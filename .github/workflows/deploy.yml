@@ -1,11 +1,11 @@
-name: Flask App Deploymenton
+name: CI-CD Linux Flask App
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
 
 jobs:
-  build-test-deploy: 
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,37 +15,32 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
-    
+        python-version: '3.10'
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
 
     - name: Run tests
       run: |
-        echo "No tests found..."
-    
-    - name: Deploy to Windows VM
-      uses: Amadevus/pwsh-remote@v1
-      with:
-        host: ${{ secrets.WIN_VM_IP }}
-        username: ${{ secrets.WIN_VM_USER }}
-        password: ${{ secrets.WIN_VM_PASSWORD }}
+        pytest || echo "No tests found"
 
-    - name: Copy project files to Windows VM
+    - name: Copy project files to Linux VM
       uses: appleboy/scp-action@v0.1.4
       with:
-        host: ${{ secrets.WIN_VM_IP }}
-        username: ${{ secrets.WIN_VM_USER }}
-        password: ${{ secrets.WIN_VM_PASSWORD }}
+        host: ${{ secrets.LINUX_VM_IP }}
+        username: ${{ secrets.LINUX_VM_USER }}
+        key: ${{ secrets.LINUX_VM_KEY }}
         source: "./"
-        target: "/flaskapp"
+        target: "~/flaskapp"
 
-    - name: Restart Flask App
-      uses: Amadevus/pwsh-remote@v1
+    - name: Restart Flask App on VM
+      uses: appleboy/ssh-action@v0.1.6
       with:
-        host: ${{ secrets.WIN_VM_IP }}
-        username: ${{ secrets.WIN_VM_USER }}
-        password: ${{ secrets.WIN_VM_PASSWORD }}
+        host: ${{ secrets.LINUX_VM_IP }}
+        username: ${{ secrets.LINUX_VM_USER }}
+        key: ${{ secrets.LINUX_VM_KEY }}
         script: |
-          C:\flaskapp\start_app.ps1
+          pkill -f "python3 app.py" || true
+          cd ~/flaskapp
+          nohup python3 app.py &
