@@ -47,10 +47,6 @@ def random_fact():
         return jsonify({"error": "No local facts available"}), 500
     return jsonify({"source": "local", "fact": random.choice(local)})
 
-@app.route('/api/data')
-def data():
-    return {"value": 42}
-
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000)
 

@@ -1,5 +1,4 @@
 scrape_configs:
   - job_name: 'flaskapp'
-    metrics_path: /metrics    
     static_configs:
-      - targets: ['127.0.0.1:80'] 
+      - targets: ['127.0.0.1:5000']
