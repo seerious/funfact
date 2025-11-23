@@ -5,6 +5,7 @@ import requests
 
 from pathlib import Path
 from flask import Flask, jsonify, render_template, send_from_directory
+from prometheus_flask_exporter import PrometheusMetrics
 
 BASE_DIR = Path(__file__).parent
 FACTS_FILE = BASE_DIR / "facts.json"
@@ -13,6 +14,7 @@ USE_API = os.getenv("Use API", "true").lower() in ["1", "true", "yes"]
 API_URL = os.getenv("FACTS_API_URL", "https://uselessfacts.jsph.pl/random.json?language=en")
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 def load_local_facts():
     if not FACTS_FILE.exists():
@@ -44,6 +46,10 @@ def random_fact():
     if not local:
         return jsonify({"error": "No local facts available"}), 500
     return jsonify({"source": "local", "fact": random.choice(local)})
+
+@app.route('/api/data')
+def data():
+    return {"value": 42}
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000)
