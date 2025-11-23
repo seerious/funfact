@@ -23,7 +23,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest || echo "No tests found"
+        pytest -v || echo "No tests found"
 
     - name: Copy project files to Linux VM
       uses: appleboy/scp-action@v0.1.4
