@@ -34,13 +34,15 @@ jobs:
         source: "./"
         target: "~/flaskapp"
 
-    - name: Restart Flask App on VM
+    - name: Restart Flask App
       uses: appleboy/ssh-action@v0.1.6
       with:
         host: ${{ secrets.LINUX_VM_IP }}
         username: ${{ secrets.LINUX_VM_USER }}
         key: ${{ secrets.LINUX_VM_KEY }}
         script: |
+          # Stop any old Flask process
           pkill -f "python3 app.py" || true
-          cd ~/flaskapp
-          nohup python3 app.py &
+          
+          # Start Flask app in background and redirect logs
+          nohup /usr/bin/python3 /home/${{ secrets.LINUX_VM_USER }}/flaskapp/app.py > /home/${{ secrets.LINUX_VM_USER }}/flaskapp/log.txt 2>&1 &
